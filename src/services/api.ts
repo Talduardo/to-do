@@ -1,6 +1,6 @@
 import { List, Task, CreateListDTO, CreateTaskDTO, UpdateTaskDTO } from '../types';
 
-const BASE = '/lists';
+const BASE = import.meta.env.VITE_API_URL || '/lists';
 
 const handleResponse = async <T>(res: Response): Promise<T> => {
   if (!res.ok) {
