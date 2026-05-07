@@ -5,6 +5,7 @@ interface Props {
   lists: List[];
   taskCounts: Record<number, number>;
   activeListId: number | null;
+  isOpen: boolean;
   onSelect: (id: number) => void;
   onNewList: () => void;
   onEditList: (list: List) => void;
@@ -15,13 +16,14 @@ export function Sidebar({
   lists,
   taskCounts,
   activeListId,
+  isOpen,
   onSelect,
   onNewList,
   onEditList,
   onDeleteList,
 }: Props) {
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
       <div className={styles.header}>
         <span className={styles.title}>Minhas listas</span>
         <button className={styles.newBtn} onClick={onNewList} title="Nova lista">
