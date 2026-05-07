@@ -146,3 +146,80 @@
 .retryBtn:hover {
   background: var(--accent-hover);
 }
+
+/* ── Botão hamburguer (só aparece no mobile) ─────────────────────── */
+.menuBtn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+/* ── Overlay escuro por trás do drawer ──────────────────────────── */
+.drawerOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+
+.drawerOverlay.open {
+  display: block;
+}
+
+/* ── FAB: botão flutuante "+ Nova tarefa" no mobile ─────────────── */
+.fab {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 26px;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.5);
+  z-index: 30;
+  border: none;
+  line-height: 1;
+}
+
+/* ── RESPONSIVO ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .menuBtn {
+    display: flex;
+  }
+
+  .fab {
+    display: flex;
+  }
+
+  .newTaskBtn {
+    display: none;
+  }
+
+  .mainHeader {
+    padding: 14px 16px 12px;
+  }
+
+  .listTitle {
+    font-size: 16px;
+  }
+
+  .taskList {
+    padding: 14px 16px 80px;
+  }
+}
