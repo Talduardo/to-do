@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  transition: transform 0.25s ease;
 }
 
 .header {
@@ -142,4 +143,26 @@
 .dangerBtn:hover {
   background: var(--danger-bg) !important;
   color: var(--danger) !important;
+}
+
+/* ── RESPONSIVO ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* No mobile mostra os botões de ação sempre (sem precisar hover) */
+  .actions {
+    display: flex;
+  }
 }
