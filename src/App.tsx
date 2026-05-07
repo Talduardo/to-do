@@ -23,24 +23,23 @@ export default function App() {
   const [modal, setModal] = useState<ModalState>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const closeModal = () => setModal(null);
 
-  // Carrega listas ao montar
   const loadLists = useCallback(async () => {
     try {
       setLoading(true);
       const data = await api.fetchLists();
       setLists(data);
       if (data.length > 0 && !activeListId) setActiveListId(data[0].id);
-    } catch (e) {
+    } catch {
       setError('Erro ao carregar listas. Verifique se o servidor está rodando.');
     } finally {
       setLoading(false);
     }
   }, [activeListId]);
 
-  // Carrega tarefas quando troca de lista
   const loadTasks = useCallback(async (listId: number) => {
     try {
       const data = await api.fetchTasks(listId);
@@ -53,11 +52,15 @@ export default function App() {
   useEffect(() => { loadLists(); }, []);
   useEffect(() => { if (activeListId) loadTasks(activeListId); }, [activeListId]);
 
-  // Contagem de tarefas por lista (para a sidebar)
   const taskCounts = lists.reduce<Record<number, number>>((acc, l) => {
     acc[l.id] = activeListId === l.id ? tasks.length : (acc[l.id] ?? 0);
     return acc;
   }, {});
+
+  const handleSelectList = (id: number) => {
+    setActiveListId(id);
+    setDrawerOpen(false); // fecha o drawer ao selecionar lista no mobile
+  };
 
   // ── CRUD Listas ─────────────────────────────────────────────────────────
 
@@ -131,7 +134,7 @@ export default function App() {
       const updated = await api.updateTask(activeListId, taskId, { status });
       setTasks((prev) => prev.map((t) => (t.id === taskId ? updated : t)));
     } catch {
-      // silently fail on quick status change
+      // silently fail
     }
   };
 
@@ -159,11 +162,18 @@ export default function App() {
 
   return (
     <div className={styles.layout}>
+      {/* Overlay escuro quando o drawer está aberto no mobile */}
+      <div
+        className={`${styles.drawerOverlay} ${drawerOpen ? styles.open : ''}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
       <Sidebar
         lists={lists}
         taskCounts={taskCounts}
         activeListId={activeListId}
-        onSelect={(id) => setActiveListId(id)}
+        isOpen={drawerOpen}
+        onSelect={handleSelectList}
         onNewList={() => setModal({ type: 'newList' })}
         onEditList={(l) => setModal({ type: 'editList', list: l })}
         onDeleteList={(l) => setModal({ type: 'deleteList', list: l })}
@@ -178,12 +188,23 @@ export default function App() {
         ) : (
           <>
             <div className={styles.mainHeader}>
-              <div>
-                <h1 className={styles.listTitle}>{activeList.name}</h1>
-                <p className={styles.listMeta}>
-                  {tasks.length} tarefa{tasks.length !== 1 ? 's' : ''} · {doneCount} concluída{doneCount !== 1 ? 's' : ''}
-                </p>
+              <div style={{ display: 'flex', alignItems: 'center', minWidth: 0 }}>
+                {/* Botão hamburguer — só visível no mobile */}
+                <button
+                  className={styles.menuBtn}
+                  onClick={() => setDrawerOpen(true)}
+                  title="Abrir menu"
+                >
+                  ☰
+                </button>
+                <div style={{ minWidth: 0 }}>
+                  <h1 className={styles.listTitle}>{activeList.name}</h1>
+                  <p className={styles.listMeta}>
+                    {tasks.length} tarefa{tasks.length !== 1 ? 's' : ''} · {doneCount} concluída{doneCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
               </div>
+              {/* Botão visível apenas no desktop */}
               <button
                 className={styles.newTaskBtn}
                 onClick={() => setModal({ type: 'newTask' })}
@@ -213,31 +234,42 @@ export default function App() {
             </div>
           </>
         )}
+
+        {/* FAB — botão flutuante no mobile */}
+        {activeList && (
+          <button
+            className={styles.fab}
+            onClick={() => setModal({ type: 'newTask' })}
+            title="Nova tarefa"
+          >
+            +
+          </button>
+        )}
       </main>
 
       {/* Modais */}
-      {(modal?.type === 'newList') && (
+      {modal?.type === 'newList' && (
         <ListModal onSave={handleSaveList} onClose={closeModal} />
       )}
-      {(modal?.type === 'editList') && (
+      {modal?.type === 'editList' && (
         <ListModal item={modal.list} onSave={handleSaveList} onClose={closeModal} />
       )}
-      {(modal?.type === 'deleteList') && (
+      {modal?.type === 'deleteList' && (
         <DeleteModal
           title="Remover lista"
           message={`Tem certeza que deseja remover a lista "${modal.list.name}"?`}
-          warning={`Todas as tarefas vinculadas a esta lista também serão removidas permanentemente.`}
+          warning="Todas as tarefas vinculadas a esta lista também serão removidas permanentemente."
           onConfirm={() => handleDeleteList(modal.list)}
           onClose={closeModal}
         />
       )}
-      {(modal?.type === 'newTask') && (
+      {modal?.type === 'newTask' && (
         <TaskModal onSave={handleSaveTask} onClose={closeModal} />
       )}
-      {(modal?.type === 'editTask') && (
+      {modal?.type === 'editTask' && (
         <TaskModal item={modal.task} onSave={handleSaveTask} onClose={closeModal} />
       )}
-      {(modal?.type === 'deleteTask') && (
+      {modal?.type === 'deleteTask' && (
         <DeleteModal
           title="Remover tarefa"
           message={`Tem certeza que deseja remover "${modal.task.title}"?`}
